@@ -10,7 +10,7 @@ public class AccountsGoogleMapControllerTest  {
         lstAccounts[0].BillingPostalCode = '131001';
         lstAccounts[0].BillingCountry = 'India';
         lstAccounts[0].BillingLongitude = 76.80921; // Valid Longitude
-        lstAccounts[0].BillingLatitude = 30.76042;  // Valid Latitude
+        lstAccounts[0].BillingLatitude = 30.76099;  // Valid Latitude
         insert lstAccounts;
     }
      @IsTest
