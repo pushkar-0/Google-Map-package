@@ -1,0 +1,81 @@
+<template>
+   <template if:true={isLoading}>
+      <lightning-spinner alternative-text="Loading" size="large">
+      </lightning-spinner>
+   </template>
+   <lightning-card>
+      <div class="slds-theme--shade slds-box_border slds-m-around--x-small">
+         <div class="component-header-container slds-size--1-of-1 slds-p-top--small" style="min-height: 3rem;">
+            <div class="slds-p-left--x-small slds-float--left ">
+               <lightning-icon icon-name="standard:account" alternative-text="Session Image"></lightning-icon>
+               <b class="slds-p-left--small">Kizzy Map Filter</b>
+            </div>
+            <lightning-layout class="slds-float--right">
+               <lightning-button-icon icon-name="utility:filterList" size="medium"
+                  class="my-icon slds-p-right--xx-small" onclick={openFilterPopup}>
+               </lightning-button-icon>
+            </lightning-layout>
+         </div>
+      </div>
+      <div class="slds-m-around-medium">
+         <template if:true={accountData}>
+            <ul>
+               <div class="slds-m-left--medium" style="font-size: 1.25rem;"> Number of {sobjectName}:
+                  {mapMarkers.length}
+               </div>
+               <div class="slds-scrollable" style="max-height: 69vh;">
+                  <template for:each={mapMarkers} for:item="eachMarker" for:index="index">
+                     <li key={eachMarker.index} class="slds-coordinates__item">
+                        <span aria-live="polite" class="slds-assistive-text"></span>
+                        <button aria-pressed="false" type="button" class="slds-coordinates__item-action slds-button_reset slds-media">
+                        <span class="slds-media__figure">
+                          <lightning-icon icon-name="standard:location" size="large"></lightning-icon> 
+                        </span>
+                        <span 
+                        class="slds-media__body" 
+                        onmouseover={handleMarkerHover} 
+                        onmouseout={handleMarkerUnhover}
+                        data-marker-index={index}>
+                        <span class="slds-text-link"
+                         onclick={handleNavigateToSobject}
+                         data-accountid={eachMarker.Id}>
+                        
+                              <template if:true={eachMarker.title}>
+                                 {eachMarker.title}
+                              </template>
+                              <template if:false={eachMarker.title}>
+                                  {eachMarker.address}
+                              </template>                         
+                         </span>
+
+                         <span>
+                            <template if:true={eachMarker.title}>
+                                 {eachMarker.address}
+                                </template>
+                        </span>
+                        </span>
+                        
+                        <div style="font-size: 20px;" >{eachMarker.index}</div>
+                     </button>
+                     </li>
+                  </template>
+               </div>
+            </ul>
+         </template>
+         <template if:false={accountData}>
+            <c-no-records-found></c-no-records-found>
+            <h3 class="slds-m-around-medium slds-align_absolute-center" style="font-size: 1.25rem;">
+               No Records Available
+            </h3>
+         </template>
+      </div>
+      <!-- FILTER SCREEN  -->
+      <div class="popup-container">
+         <div if:true={isPopupVisible}>
+            <c-accounts-google-map-filter-screen onclosepopup={closeFilterPopup} onapply={handleFilter}>
+            </c-accounts-google-map-filter-screen>
+         </div>
+
+      </div>
+   </lightning-card>
+</template>

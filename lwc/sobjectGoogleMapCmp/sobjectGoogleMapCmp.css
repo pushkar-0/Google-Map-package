@@ -1,0 +1,8 @@
+.custom-container{
+	color : black;
+}
+
+.custom-combobox .slds-dropdown__list {
+    max-height: 160px;  /* 4 options (assuming each option is ~40px) */
+    overflow-y: auto;   /* Enables scrolling */
+}

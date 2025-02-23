@@ -1,0 +1,298 @@
+<apex:page >
+    <apex:includeLightning />
+    <apex:slds />
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    </head>
+
+    <body>
+        <div id="map-container" style="width: 100%; height: 100vh;"></div>
+        <script>
+            document.addEventListener("lightning__showtoast", (event) => {
+                // Check if sforce.one is available to ensure it's running in Lightning
+                if (typeof sforce !== "undefined" && sforce.one) {
+                    console.log("Toast Event Detected, Showing Toast...");
+                    sforce?.one?.showToast({
+                        title: event.detail.title || "Success",
+                        message: event.detail.message || "Action completed successfully!",
+                        type: event.detail.type || "success", // You can also use "error", "warning", "info"
+                        mode: event.detail.mode || "dismissible", // Can be "sticky" or "pester"
+                    });
+                } else {
+                    console.error("sforce.one not available. Make sure you are in Lightning or Mobile.");
+                }
+            });
+
+            // Function to trigger toast for errors
+            function triggerErrorToast(errorTitle, errorMessage) {
+                const toastEvent = new CustomEvent("lightning__showtoast", {
+                    detail: {
+                        title: errorTitle,
+                        message: errorMessage,
+                        type: "error", // Set toast type to error
+                        mode: "dismissible",
+                    },
+                });
+                document.dispatchEvent(toastEvent);
+            }
+
+            const MAP_API_KEY = "AIzaSyCt8UjEfCf9xmQtJ--OkzMeYda2hNOwHzk";
+            let map;
+            let markers = [];
+            var messageChannelLMS = "{!$MessageChannel.MapMarkersMessageChannel__c}";
+            let infoWindow;
+
+            const loadGoogleMapScript = () => {
+                return new Promise((resolve, reject) => {
+                    try {
+                        console.log("loadGoogleMapScript called");
+                        if (window.google && window.google.maps) {
+                            console.log("Google Maps already loaded.");
+                            resolve();
+                            return;
+                        }
+
+                        console.log("Loading Google Maps script...");
+                        const script = document.createElement("script");
+                        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&v=weekly&libraries=marker`;
+                        script.async = true;
+                        script.defer = true;
+                        script.onload = () => {
+                            console.log("Google Maps script loaded successfully.");
+                            resolve();
+                        };
+                        script.onerror = (error) => {
+                            console.error("Error loading Google Maps script:", error);
+                            triggerErrorToast("Google Maps Load Error", "Failed to load Google Maps script. Please try again.");
+                            reject(error);
+                        };
+                        document.head.appendChild(script);
+                    } catch (error) {
+                        console.error("Error in loadGoogleMapScript:", error);
+                        triggerErrorToast("Google Maps Load Error", "Error occurred while loading Google Maps script.");
+                        reject(error);
+                    }
+                });
+            };
+
+            const initializeMap = async () => {
+                try {
+                    console.log("initializeMap called");
+                    const mapContainer = document.getElementById("map-container");
+                    if (!mapContainer) {
+                        throw new Error("Map container element not found");
+                    }
+                    const { Map } = await google.maps.importLibrary("maps");
+                    map = new Map(mapContainer, {
+                        center: {
+                            lat: 39.016683,
+                            lng: -76.699544
+                        }, // Kizzy Consulting Lat Long
+                        zoom: 14,
+                        mapId: "DEMO_MAP_ID", // Add a map ID
+                    });
+                    infoWindow = new google.maps.InfoWindow(); // Initialize the info window
+                    console.log("Google Map initialized with center:", map.getCenter().toJSON());
+                } catch (error) {
+                    console.error("Error in initializeMap:", error);
+                    triggerErrorToast("Map Initialization Error", "An error occurred while initializing the Google Map.");
+                }
+            };
+
+            const handleLmsMessage = async (message) => {
+                try {
+                    if (message.action === 'hover') {
+                        // Handle hover event
+                        const hoveredMarker = markers[message.markerId];
+                        if (hoveredMarker) {
+                            // Open info window for the hovered marker
+                            infoWindow.close(); // Close any existing info window
+                            infoWindow.setContent(hoveredMarker.title);
+                            infoWindow.open(map, hoveredMarker);
+
+                            // Animate the marker without affecting its map presence
+                            if (hoveredMarker.content) {
+                                hoveredMarker.content.style.transform = 'scale(1.2)';
+                                hoveredMarker.content.style.transition = 'transform 0.2s';
+                            }
+                        }
+                    }
+                    else if (message.action === 'unhover') {
+                        // Handle unhover event
+                        infoWindow.close();
+
+                        // Reset markers to normal state without removing them
+                        markers.forEach(marker => {
+                            if (marker.content) {
+                                marker.content.style.transform = 'scale(1)';
+                            }
+                        });
+                    }
+                    else if (Array.isArray(message.markers)) {
+                        // Clear existing markers only when new markers are being added
+                        markers.forEach((marker) => {
+                            marker.setMap(null);
+                        });
+                        markers = [];
+
+                        console.log("Updating markers on the map with received data:", message.markers);
+                        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+                        let serialNumber = 1;
+
+                        // Rest of your marker creation code...
+                        let center = { lat: 30.71658, lng: 76.84875 }; // Default center coordinates
+                        const bounds = new google.maps.LatLngBounds();
+
+                        for (const markerData of message.markers) {
+                            if (!markerData.Latitude || !markerData.Longitude) {
+                                console.warn("Invalid marker data, skipping:", markerData);
+                                continue;
+                            }
+                            /*if (!markerData.location || !markerData.location.Latitude || !markerData.location.Longitude) {
+                                console.warn("Invalid marker data, skipping:", markerData);
+                                continue;
+                            }
+
+                            const lat = parseFloat(markerData.location.Latitude);
+                            const lng = parseFloat(markerData.location.Longitude);*/
+                            //Updated by : Pushkar On 10-02-025
+                            const lat = parseFloat(markerData.Latitude);
+                            const lng = parseFloat(markerData.Longitude);
+                            center = { lat, lng };
+
+                            if (isNaN(lat) || isNaN(lng)) {
+                                console.warn("Invalid latitude or longitude, skipping:", markerData);
+                                continue;
+                            }
+                            bounds.extend(new google.maps.LatLng(lat, lng));
+
+                            const markerContent = document.createElement("div");
+                            markerContent.innerText = `${serialNumber}. ${markerData.title}`;
+
+                            const pin = new PinElement({
+                                glyph: `${serialNumber}`,
+                                scale: 1.5,
+                                background: markerData.isOwner ? "#FF0000" : "#0000FF",
+                                glyphColor: "white",
+                                borderColor: markerData.isOwner ? "#8B0000" : "#00008B",
+                            });
+
+                            const marker = new AdvancedMarkerElement({
+                                position: { lat, lng },
+                                map,
+                                title: `${serialNumber}. ${markerData.title}`,
+                                content: pin.element,
+                                gmpClickable: true,
+                            });
+
+                            marker.element.setAttribute('data-marker-id', serialNumber - 1);
+                            marker.markerId = serialNumber - 1;
+
+                            // Add hover listeners to the marker
+                            marker.content.addEventListener('mouseover', () => {
+                                marker.content.style.transform = 'scale(1.2)';
+                                marker.content.style.transition = 'transform 0.2s';
+                                infoWindow.setContent(marker.title);
+                                infoWindow.open(map, marker);
+                            });
+
+
+                            marker.addListener("click", () => {
+                                const sObjectId = markerData.Id; 
+                                const sObjectName = markerData.sobject;
+                                console.log('sObjectId::',sObjectId);
+                                if (sObjectId && sObjectName) {
+                                    const accountUrl = `/lightning/r/${sObjectName}/${sObjectId}/view`;
+                                    window.open(accountUrl, "_blank");
+                                } else {
+                                    console.error("Account ID not found for marker:", markerData);
+                                    triggerErrorToast("Navigation Error", "Account ID is missing for the selected marker.");
+                                }
+                            });
+
+                            marker.content.addEventListener('mouseout', () => {
+                                marker.content.style.transform = 'scale(1)';
+                                infoWindow.close();
+                            });
+
+                            // Add click listener
+                            marker.addListener("click", () => {
+                                infoWindow.close();
+                                infoWindow.setContent(marker.title);
+                                infoWindow.open(map, marker);
+                            });
+
+                            markers.push(marker);
+                            serialNumber++;
+                        }
+                        if (!bounds.isEmpty()) {
+                            const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+                            map.fitBounds(bounds, padding);
+
+                            // Optional: Adjust zoom level if bounds are too large
+                            google.maps.event.addListenerOnce(map, "bounds_changed", () => {
+                                if (map.getZoom() > 15) {
+                                    map.setZoom(15); // Maximum zoom level
+                                } else if (map.getZoom() < 3) {
+                                    map.setZoom(3); // Minimum zoom level
+                                }
+                            });
+                        } else {
+                            console.warn("No valid markers to set bounds. Using default center and zoom.");
+                            map.setCenter({ lat: 30.71658, lng: 76.84875 });
+                            map.setZoom(14);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error in handleLmsMessage:", error);
+                    triggerErrorToast("LMS Message Error", "An error occurred while processing LMS messages.");
+                }
+            };
+
+            const findMarkerByData = (markerData) => {
+                return markers.find(marker =>
+                    marker.position.lat() === parseFloat(markerData.location.Latitude) &&
+                    marker.position.lng() === parseFloat(markerData.location.Longitude)
+                );
+            };
+
+            function initLightning() {
+                try {
+                    console.log("initLightning called");
+                    subscriptionToMC = sforce.one.subscribe(messageChannelLMS, handleLmsMessage);
+                    console.log("Subscribed to message channel:", messageChannelLMS);
+                } catch (error) {
+                    console.error("Error in initLightning:", error);
+                    triggerErrorToast("Lightning Initialization Error", "Failed to initialize Lightning Messaging Service.");
+                }
+            }
+
+            const init = async () => {
+                try {
+                    console.log("Init function called");
+                    await loadGoogleMapScript();
+                    await initializeMap();
+                    initLightning();
+                    console.log("Initialization completed");
+                } catch (error) {
+                    console.error("Error during initialization:", error);
+                    triggerErrorToast("Initialization Error", "An error occurred during the initialization process.");
+                }
+            };
+
+            window.addEventListener("load", init);
+        </script>
+        <style>
+            .slds-media__body {
+                cursor: pointer;
+                transition: background-color 0.2s;
+                padding: 0.5rem;
+            }
+
+            .slds-media__body:hover {
+                background-color: #f3f3f3;
+            }
+        </style>
+    </body>
+</apex:page>

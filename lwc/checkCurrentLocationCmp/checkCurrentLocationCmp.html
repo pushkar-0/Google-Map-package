@@ -1,0 +1,22 @@
+<template>
+    <lightning-card title="Current Location Checker" icon-name="action:map">
+        <div class="slds-var-p-around_medium">
+            <lightning-button label="Check Location" onclick={handleCheckLocation} class="slds-m-bottom_small"></lightning-button>
+
+            <template if:true={showLocation}>
+                <p>
+                    <b>Latitude:</b> {latitude} <br/>
+                    <b>Longitude:</b> {longitude}
+                </p>
+            </template>
+
+            <template if:true={showError}>
+                <p class="slds-text-color_error">{error}</p>
+            </template>
+
+            <template if:true={showPermissionPrompt}>
+                <p class="slds-text-color_warning">Please allow geolocation access when prompted by your browser to check your location.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

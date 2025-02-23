@@ -1,0 +1,71 @@
+<template>
+   <template if:true={isLoading}>
+      <lightning-spinner alternative-text="Loading" size="large">
+      </lightning-spinner>
+   </template>
+   <div class="popup slds-scrollable" style="max-height: 74vh;">
+      <!-- Address Fields -->
+      <div class="slds-p-around--medium">
+
+         <!-- Added By : Pushkar On 27.01.025 -->
+         <lightning-combobox name="objectNames" label="Select Object" placeholder="Choose an object"
+            options={objectOptions} onchange={handleChange} value={selectedObjectName}></lightning-combobox>
+
+         <!-- LOOK-UP -->
+         <template if:true={isLookUp}>
+            <c-customlwclookup label={selectedObjectName} object-name={selectedObjectName} field-name="Name"
+               placeholder={selectedObjectName} value={sobject} icon-name="standard:Account"
+               data-id={sObjectAddressFieldName} onvalueselected={handelLookUpDataChange}>
+            </c-customlwclookup>
+         </template>
+
+         <template for:each={selectedObjectFields} for:item="field" key={field.fieldAPIName}>
+
+            <template if:true={field.isAddressField}>
+               <lightning-input-address key={field.fieldAPIName} address-label='Address' street-label='Street'
+                  city-label='City' country-label='Country' province-label='State/ Province'
+                  postal-code-label='Zip/ Postal Code' street={street} city={city} country={country}
+                  postal-code={postalCode} province={state} class="validate" data-id={field.fieldAPIName}
+                  onchange={addressInputChange} required>
+               </lightning-input-address>
+            </template>
+            <template if:true={field.isBooleanField}>
+               <lightning-input key={field.fieldAPIName} label={field.fieldAPIName} type="checkbox" checked={isChecked}
+                  data-id={field.fieldAPIName} onchange={handleCheckboxChange}>
+               </lightning-input>
+            </template>
+
+            <!-- For Picklist fields -->
+            <template if:true={field.isPicklistField}>
+               <lightning-combobox key={field.fieldAPIName} label={field.fieldAPIName} value={field.selectedValues}
+                  placeholder="Select an option" options={field.lstPicklistOptions} data-id={field.fieldAPIName}
+                  onchange={handlePicklistChange} class="custom-combobox">
+               </lightning-combobox>
+            </template>
+
+            <template if:true={field.isInputField}>
+               <lightning-input key={field.fieldAPIName} label={field.fieldAPIName} value={field.selectedValues}
+                  type="text" data-id={field.fieldAPIName} onchange={handleStringChange}>
+               </lightning-input>
+            </template>
+
+         </template>
+
+         <!-- End -->
+         <!-- Radius Input -->
+         <lightning-input name="Radius" label="Radius" class="validate" onchange={radiusInputChange} value="10">
+
+         </lightning-input>
+      </div>
+      <!-- Button's -->
+      <div class="footer slds-border--top slds-p-around--x-small">
+         <!-- Close button -->
+         <lightning-button label="Close" onclick={handleClear} class="clear-button">
+         </lightning-button>
+         <!-- Apply Button -->
+         <lightning-button label="Apply" variant="brand" onclick={handleApply}
+            class="apply-button slds-p-left--x-small">
+         </lightning-button>
+      </div>
+   </div>
+</template>

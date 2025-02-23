@@ -1,0 +1,96 @@
+/* .popup-container {
+    position: fixed;
+    top: 220px; 
+    right: 20px;
+    z-index: 1000;
+    width: 300px; 
+} */
+
+.popup {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* padding: 16px; */
+    padding-left: 16px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-right: 10px;
+}
+
+.label {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close-icon {
+    color: #03424D; /* Color of the close icon */
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+}
+
+.headerTextCss{
+	color: #2F2F2F;
+	font-feature-settings: 'clig' off, 'liga' off;
+	font-family: Segoe UI;
+	font-size: 24px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: 20px; /* 83.333% */
+}
+
+/* selectableList.css */
+.container {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.header1 {
+    display: flex;
+    align-items: center;
+}
+
+.list-item {
+    margin-left: 20px;
+}
+.item-container {
+    display: flex;
+    align-items: center;
+}
+.my-icon {
+    --slds-c-icon-color-foreground-default: #03424D;
+   /* --slds-c-icon-color-background: gray;*/
+}
+
+/* table tr:last-child {
+    font-weight: bold;  
+  } */
+
+.scroller {
+    overflow-y: scroll;
+}
+
+.scroller {
+    /* This is the magic bit for Firefox */
+    scrollbar-width: none;
+}
+
+.scroller::-webkit-scrollbar {
+    /* This is the magic bit for WebKit */
+    display: none;
+}
+.inline-pill {
+    display: inline-block;
+    /* Display the pills inline */
+    /*margin-right: 10px;*/
+    /* Add some spacing between pills, adjust as needed */
+}

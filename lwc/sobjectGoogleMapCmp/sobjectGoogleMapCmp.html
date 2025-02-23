@@ -1,0 +1,34 @@
+<template>
+    <lightning-combobox name="objectNames" label="Select Object" placeholder="Choose an object" options={objectOptions}
+        onchange={handleChange} value={selectedObjectName}></lightning-combobox>
+    <template for:each={selectedObjectFields} for:item="field" key={field.fieldAPIName}>
+        <template if:true={field.isAddressField}>
+            <lightning-input-address key={field.fieldAPIName} label={field.fieldAPIName} required street-label="Street"
+                city-label="City" province-label="State" postal-code-label="Postal Code" country-label="Country">
+            </lightning-input-address>
+        </template>
+
+        <!-- For Picklist fields -->
+        <template if:true={field.isPicklistField}>
+            <lightning-combobox key={field.fieldAPIName} label={field.fieldAPIName} value={field.selectedValues}
+                placeholder="Select an option" options={field.lstPicklistOptions} data-id={field.fieldAPIName}
+                onchange={handlePicklistChange} class="custom-combobox">
+            </lightning-combobox>
+        </template>
+
+
+        <template if:true={field.isInputField}>
+            <lightning-input key={field.fieldAPIName} label={field.fieldAPIName} value={field.selectedValues} type="text"
+                data-id={field.fieldAPIName} onchange={handleStringChange}>
+            </lightning-input>
+        </template>
+ <!-- <template if:true={field.isPicklistField}>
+             <lightning-input key={field.fieldAPIName} label={field.fieldAPIName} value={field.selectedValues} type="Number"
+                data-id={field.fieldAPIName} onchange={handleStringChange}>
+            </lightning-input>
+        </template> -->
+        
+    </template>
+
+
+</template>

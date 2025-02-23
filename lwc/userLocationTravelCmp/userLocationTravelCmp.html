@@ -1,0 +1,40 @@
+<template> 
+    <lightning-card variant="Narrow" class="slds-p-around_x-small">
+        <div class="slds-p-around--medium">
+            <div if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+            </div>
+
+            <!-- Display Total Distance Covered if available -->
+            <template if:true={totalDistanceCovered}>
+                <p style="font-size:15px"><b>Total Distance Travelled:</b> {totalDistanceCovered}</p>
+            </template>
+
+            <!-- Display the selected month -->
+            <template if:true={selectedMonth}>
+                <p style="font-size:15px"><b>Selected Month: </b>{selectedMonth}</p>
+            </template>
+
+            <!-- Combobox for year selection -->
+            <lightning-combobox name="Year" label="Year" value={defaultStartYear} 
+                placeholder="Select Year" options={yearOptions} 
+                onchange={handleYearChange} style="font-weight:bold">
+            </lightning-combobox>
+
+            <!-- Combobox for month selection -->
+            <lightning-combobox name="month" label="Select Month" value={selectedMonth} 
+                placeholder="Select Month" options={monthOptions} 
+                onchange={handleMonthChange}>
+            </lightning-combobox>
+
+            <!-- User selection (if needed) -->
+            <lightning-combobox name="User" label="User" value={selectedUser} 
+                placeholder="Select User" options={lstOfUserOptions} 
+                onchange={handleUserChange}>
+            </lightning-combobox>
+
+            <!-- Button to fetch travel details -->
+            <lightning-button class="slds-align--absolute-center slds-m-around--medium" label="Get Travel Details"  onclick={loadTravelDataForUser}></lightning-button>
+        </div>
+    </lightning-card>
+</template>
