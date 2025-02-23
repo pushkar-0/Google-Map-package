@@ -5,7 +5,7 @@ public class AccountsGoogleMapControllerTest  {
     public static void createTestData(){
         List<Account> lstAccounts = TestDataFactory.noOfAccountToInsert(1, 'Test Company'); 
         lstAccounts[0].BillingStreet = '123';
-        lstAccounts[0].BillingCity = 'Chandigarh';
+        lstAccounts[0].BillingCity = 'Navi Mumbai';
         lstAccounts[0].BillingState = 'Maharashtra';
         lstAccounts[0].BillingPostalCode = '131001';
         lstAccounts[0].BillingCountry = 'India';
