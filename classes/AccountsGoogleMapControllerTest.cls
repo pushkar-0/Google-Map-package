@@ -6,8 +6,8 @@ public class AccountsGoogleMapControllerTest  {
         List<Account> lstAccounts = TestDataFactory.noOfAccountToInsert(1, 'Test Company'); 
         lstAccounts[0].BillingStreet = '123';
         lstAccounts[0].BillingCity = 'Chandigarh';
-        lstAccounts[0].BillingState = 'Chandigarh';
-        lstAccounts[0].BillingPostalCode = '160001';
+        lstAccounts[0].BillingState = 'Maharashtra';
+        lstAccounts[0].BillingPostalCode = '131001';
         lstAccounts[0].BillingCountry = 'India';
         lstAccounts[0].BillingLongitude = 76.80921; // Valid Longitude
         lstAccounts[0].BillingLatitude = 30.76042;  // Valid Latitude
